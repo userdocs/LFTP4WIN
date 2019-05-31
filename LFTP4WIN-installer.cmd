@@ -207,25 +207,28 @@ echo Creating updater [%Updater_cmd%]...
     echo set GRP=
     echo set SHELL=/bin/bash
     echo echo.
-    echo.
-    echo echo ###########################################################
-    echo echo # Updating [LFTP4WIN Portable]...
-    echo echo ###########################################################
+    echo set /p "reply=Update Cygwin? [y|n]: "
     echo echo.
-    echo "%%LFTP4WIN_ROOT%%\%CYGWIN_SETUP%" --no-admin ^^
-    echo --site %CYGWIN_MIRROR% %CYGWIN_PROXY% ^^
-    echo --root "%%LFTP4WIN_ROOT%%" ^^
-    echo --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
-    echo --no-shortcuts ^^
-    echo --no-desktop ^^
-    echo --delete-orphans ^^
-    echo --upgrade-also ^^
-    echo --no-replaceonreboot ^^
-    echo --quiet-mode %CYGWIN_PACKET_MANAGER% ^|^| goto :fail
+    echo if "%%reply%%" == "y" ^(
+    echo     echo ###########################################################
+    echo     echo # Updating Cygwin [LFTP4WIN Portable]...
+    echo     echo ###########################################################
+    echo     echo.
+    echo     "%%LFTP4WIN_ROOT%%\%CYGWIN_SETUP%" --no-admin ^^
+    echo     --site %CYGWIN_MIRROR% %CYGWIN_PROXY% ^^
+    echo     --root "%%LFTP4WIN_ROOT%%" ^^
+    echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
+    echo     --no-shortcuts ^^
+    echo     --no-desktop ^^
+    echo     --delete-orphans ^^
+    echo     --upgrade-also ^^
+    echo     --no-replaceonreboot ^^
+    echo     --quiet-mode %CYGWIN_PACKET_MANAGER% ^|^| goto :fail
     if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
-        echo rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
+        echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
     )
-    echo echo.
+    echo     echo.
+    echo ^)
 	echo.
 	echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
 	echo.
@@ -291,6 +294,7 @@ echo Creating [%Init_sh%]...
         echo     echo "*******************************************************************************"
         echo     echo "* Installing LFTP4WIN CORE..."
         echo     echo "*******************************************************************************"
+        echo     echo
         echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
         echo     echo "Download URL=$lftp4win_core_url"
         echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
