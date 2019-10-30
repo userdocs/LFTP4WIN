@@ -2,7 +2,9 @@
 
 This is a deployment tool that allows you to install a portable Cygwin x64 installation to use with the [LFTP4WIN-CORE](https://github.com/userdocs/LFTP4WIN-CORE) solution.
 
-Configuration options are set in the `LFTP4WIN-installer.cmd`
+The script is configured to install the required components automatically and you don't need to edit anything to get this to work out of the box. Just follow the installation insrtuctions.
+
+If you require a specific setting, configuration options are set in the `LFTP4WIN-installer.cmd` using a text editor.
 
 ## Installation
 
@@ -16,8 +18,7 @@ When the installer is finished it will look like this.
 
 ![packages](https://github.com/userdocs/LFTP4WIN-CORE/raw/master/help/docs/readme-images/install-complete.jpg)
 
-Note: If the install was not complete because your firewall blocks parts of the setup (curl) you can simply run the installer over to download the required files. Make sure to tell Cygwin to keep the existing versions instead of updating `openssh` and `openssl`.
-
+Note: If the install was not complete because your firewall blocks parts of the setup (curl) you can simply run the installer over to download the required files.
 ## Post Installation
 
 `cmd` files what they do:
@@ -26,7 +27,7 @@ Note: If the install was not complete because your firewall blocks parts of the 
 
 `LFTP4WIN-conemu.cmd` - Starts ConEmu in the home folder and `kageant` if keys files are present.
 
-`LFTP4WIN-import.cmd` - Imports your settings from another installation (2.0 or greater)
+`LFTP4WIN-import.cmd` - Imports your settings from another installation (2.0 or greater) by running this script.
 
 `LFTP4WIN-installer.cmd` - The main installation script. Installing this again will reset everything.
 
