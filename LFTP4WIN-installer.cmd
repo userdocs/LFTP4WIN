@@ -207,14 +207,19 @@ echo Creating updater [%Updater_cmd%]...
     echo set GRP=
     echo set SHELL=/bin/bash
     echo echo.
-    echo set /p "reply=Update Cygwin? [y|n]: "
+    echo set /p "REPLY=Update Cygwin? [y|n]: "
     echo echo.
-    echo if "%%reply%%" == "y" ^(
-    echo     set /p "pmanager=Open Cygwin packet manager? [y|n]: "
+    echo.
+    echo if "%%REPLY%%" == "y" ^(
+    echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n]: "
     echo     echo.
-    echo     if "%%pmanager%%" == "y" ^(
-    echo        set %%pmanager%%"=--package-manager
-    echo     ^)
+    echo ^)
+    echo.
+    echo if "%%PACKETMANAGER%%" == "y" ^(
+    echo     set PACKETMANAGER=--package-manager
+    echo ^)
+    echo.
+    echo if "%%REPLY%%" == "y" ^(
     echo     echo ###########################################################
     echo     echo # Updating Cygwin [LFTP4WIN Portable]...
     echo     echo ###########################################################
@@ -228,7 +233,7 @@ echo Creating updater [%Updater_cmd%]...
     echo     --delete-orphans ^^
     echo     --upgrade-also ^^
     echo     --no-replaceonreboot ^^
-    echo     --quiet-mode %CYGWIN_PACKET_MANAGER% ^|^| goto :fail
+    echo     --quiet-mode %%PACKETMANAGER%% ^|^| goto :fail
     if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
         echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
     )
