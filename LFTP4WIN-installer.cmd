@@ -35,7 +35,7 @@
 set LFTP4WIN_USERNAME=LFTP4WIN
 
 :: Show the packet manager if you need to specify a program version during installation instead of using the current release (default), like openssh 7.9 instead of 8.0 for Lftp.
-set CYGWIN_PACKET_MANAGER=no
+set CYGWIN_PACKET_MANAGER=
 
 :: Select the packages to be installed automatically - required packages for LFTP4WIN:bsdtar,bash-completion,curl,lftp,ssh-pageant,openssh
 set CYGWIN_PACKAGES=bsdtar,bash-completion,curl,lftp,ssh-pageant,openssh,openssl
@@ -210,6 +210,11 @@ echo Creating updater [%Updater_cmd%]...
     echo set /p "reply=Update Cygwin? [y|n]: "
     echo echo.
     echo if "%%reply%%" == "y" ^(
+    echo     set /p "pmanager=Open Cygwin packet manager? [y|n]: "
+    echo     echo.
+    echo     if "%%pmanager%%" == "y" ^(
+    echo        set %%pmanager%%"=--package-manager
+    echo     ^)
     echo     echo ###########################################################
     echo     echo # Updating Cygwin [LFTP4WIN Portable]...
     echo     echo ###########################################################
