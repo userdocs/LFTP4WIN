@@ -1,10 +1,10 @@
 # LFTP4WIN Installer.
 
-This is a deployment tool that allows you to install a portable Cygwin x64 installation to use with the [LFTP4WIN-CORE](https://github.com/userdocs/LFTP4WIN-CORE) solution.
+This is a deployment tool that allows you to install a portable and configured Cygwin x64 installation to use with the [LFTP4WIN-CORE](https://github.com/userdocs/LFTP4WIN-CORE) solution.
 
-The script is configured to install the required components automatically and you don't need to edit anything to get this to work out of the box. Just follow the installation insrtuctions.
+The script is configured to install the required components automatically and you don't need to edit anything to get this to work out of the box. Just follow the installation instructions.
 
-If you require a specific setting, configuration options are set in the `LFTP4WIN-installer.cmd` using a text editor.
+If you require a specific setting to be modified, configuration options are set in the `LFTP4WIN-installer.cmd` using a text editor.
 
 ## Installation
 
