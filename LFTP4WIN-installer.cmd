@@ -38,13 +38,10 @@ set LFTP4WIN_USERNAME=LFTP4WIN
 set CYGWIN_PACKET_MANAGER=
 
 :: Select the packages to be installed automatically - required packages for LFTP4WIN:bsdtar,bash-completion,curl,lftp,ssh-pageant,openssh
-set CYGWIN_PACKAGES=bsdtar,bash-completion,curl,lftp,ssh-pageant,openssh,openssl,sshpass,procps-ng
+set CYGWIN_PACKAGES=wget,ca-certificates,gnupg,bsdtar,bash-completion,curl,lftp,ssh-pageant,openssh,openssl,sshpass,procps-ng
 
 :: Install the LFTP4WIN Skeleton files to use lftp via WinSCP and Conemu. Installs Conemu, kitty, WinSCP, notepad++ and makes a few minor modifications to the default cygin installation.
 set INSTALL_LFTP4WIN_CORE=yes
-
-:: if set to 'yes' the apt-cyg command line package manager (https://github.com/kou1okada/apt-cyg) will be installed automatically - requires wget,ca-certificates,gnupg which will be installed.
-set INSTALL_APT_CYG=yes
 
 :: set proxy if required (unfortunately Cygwin setup.exe does not have command line options to specify proxy user credentials)
 set PROXY_HOST=
@@ -77,6 +74,7 @@ set INSTALL_ROOT=%~dp0
 set LFTP4WIN_ROOT=%INSTALL_ROOT%system
 echo Creating Cygwin root [%LFTP4WIN_ROOT%]...
 if not exist "%LFTP4WIN_ROOT%" (
+	md "%INSTALL_ROOT%home"
     md "%LFTP4WIN_ROOT%"
 )
 
@@ -152,10 +150,6 @@ if "%PROXY_HOST%" == "" (
 
 if "%CYGWIN_PACKET_MANAGER%" == "yes" (
    set CYGWIN_PACKET_MANAGER=--package-manager
-)
-
-if "%INSTALL_APT_CYG%" == "yes" (
-   set CYGWIN_PACKAGES=wget,ca-certificates,gnupg,%CYGWIN_PACKAGES%
 )
 
 echo Running Cygwin setup...
@@ -310,21 +304,19 @@ echo Creating [%Init_sh%]...
         echo     rm "lftp4win_core.zip"
         echo fi
     )
-    if "%INSTALL_APT_CYG%" == "yes" (
-        echo #
-        echo # Installing apt-cyg package manager if not yet installed or update it silently if it is.
-        echo #
-        echo if [[ ! -x /usr/local/bin/apt-cyg ]]; then
-        echo     echo "*******************************************************************************"
-        echo     echo "* Installing apt-cyg..."
-        echo     echo "*******************************************************************************"
-        echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
-        echo     chmod +x /usr/local/bin/apt-cyg
-        echo else
-        echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
-        echo     chmod +x /usr/local/bin/apt-cyg
-        echo fi
-    )
+	echo #
+	echo # Installing apt-cyg package manager if not yet installed or update it silently if it is.
+	echo #
+	echo if [[ ! -x /usr/local/bin/apt-cyg ]]; then
+	echo     echo "*******************************************************************************"
+	echo     echo "* Installing apt-cyg..."
+	echo     echo "*******************************************************************************"
+	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
+	echo     chmod +x /usr/local/bin/apt-cyg
+	echo else
+	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
+	echo     chmod +x /usr/local/bin/apt-cyg
+	echo fi
 	echo #
 	echo # Clean up some files we don't need.
 	echo rm -f '.gitattributes' 'LICENSE.txt' 'README.md'
@@ -388,10 +380,10 @@ echo Creating launcher [%Start_cmd%]...
 	echo ^)
 ) > "%Start_cmd%" || goto :fail
 
-set Bashrc_sh=%INSTALL_ROOT%home\.bashrc
+set Bashrc_sh=%INSTALL_ROOT%home\.proxy
 
 if not "%PROXY_HOST%" == "" (
-    echo Adding proxy settings for host [%COMPUTERNAME%] to [home/.bashrc]...
+    echo Adding proxy settings for host [%COMPUTERNAME%] to [home/.proxy]...
     find "export http_proxy" "%Bashrc_sh%" >NUL || (
         echo.
         echo if [[ $HOSTNAME == "%COMPUTERNAME%" ]]; then
@@ -405,7 +397,10 @@ if not "%PROXY_HOST%" == "" (
     ) >> "%Bashrc_sh%" || goto :fail
 )
 
-"%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Bashrc_sh%" || goto :fail
+IF EXIST "%Bashrc_sh%" "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Bashrc_sh%" || goto :fail
+
+:: launching Bash once to initialize user home dir
+call "%Start_cmd%"
 
 echo.
 echo ###########################################################
