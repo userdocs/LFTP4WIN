@@ -51,7 +51,7 @@ set PROXY_HOST=
 set PROXY_PORT=8080
 
 :: change the URL to the closest mirror https://cygwin.com/mirrors.html
-set CYGWIN_MIRROR=http://cygwin.mirror.uk.sargasso.net
+set CYGWIN_MIRROR=https://cygwin.mirror.uk.sargasso.net/
 
 :: one of: auto,64,32 - specifies if 32 or 64 bit version should be installed or automatically detected based on current OS architecture
 set CYGWIN_ARCH=auto
@@ -61,26 +61,6 @@ set CYGWIN_PATH=""
 
 :: if set to 'yes' the local package cache created by cygwin setup will be deleted after installation/update
 set DELETE_CYGWIN_PACKAGE_CACHE=yes
-
-:: set Mintty options, see https://cdn.rawgit.com/mintty/mintty/master/docs/mintty.1.html#CONFIGURATION
-set MINTTY_OPTIONS=--Title cygwin-portable ^
-  -o Columns=160 ^
-  -o Rows=50 ^
-  -o BellType=0 ^
-  -o ClicksPlaceCursor=yes ^
-  -o CursorBlinks=yes ^
-  -o CursorColour=96,96,255 ^
-  -o CursorType=Block ^
-  -o CopyOnSelect=yes ^
-  -o RightClickAction=Paste ^
-  -o Font="Courier New" ^
-  -o FontHeight=10 ^
-  -o FontSmoothing=None ^
-  -o ScrollbackLines=10000 ^
-  -o Transparency=off ^
-  -o Term=xterm-256color ^
-  -o Charset=UTF-8 ^
-  -o Locale=C
 
 :: ============================================================================================================
 :: CONFIG CUSTOMIZATION END
@@ -352,7 +332,7 @@ echo Creating [%Init_sh%]...
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
 
-set Start_cmd=%INSTALL_ROOT%LFTP4WIN-conemu.cmd
+set Start_cmd=%INSTALL_ROOT%LFTP4WIN-terminal.cmd
 echo Creating launcher [%Start_cmd%]...
 (
     echo @echo off
@@ -368,9 +348,11 @@ echo Creating launcher [%Start_cmd%]...
     echo set GRP=
     echo set SHELL=/bin/bash
     echo.
+	echo set TERMINAL=mintty
+	echo.
     echo ^(
     echo     echo # /etc/fstab
-    echo     echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-conemu.cmd
+    echo     echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
     echo     echo #
     echo     echo #    This file is read once by the first process in a Cygwin process tree.
     echo     echo #    To pick up changes, restart all Cygwin processes.  For a description
@@ -391,30 +373,22 @@ echo Creating launcher [%Start_cmd%]...
     echo start "" "%%LFTP4WIN_ROOT%%\applications\kitty\kageant.exe" %%LIST:~1%%
     echo ^)
     echo.
-    echo if "%%1" == "" (
-    if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-        if "%CYGWIN_ARCH%" == "64" (
-            echo   start "" "%%~dp0system\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
-        ) else (
-            echo   start "" "%%~dp0system\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
-        )
-    ) else (
-        echo   mintty --nopin %MINTTY_OPTIONS% --icon %LFTP4WIN_ROOT%\Cygwin-Terminal.ico -
-    )
-    echo ^) else (
-    echo   if "%%1" == "no-mintty" (
-    echo     bash --login -i
-    echo   ^) else (
-    echo     bash --login -c %%*
-    echo   ^)
-    echo ^)
-    echo.
+	if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
+	echo if "%%TERMINAL%%" == "conemu" ^(
+		 if "%CYGWIN_ARCH%" == "64" (
+			 echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
+		 ) else (
+			 echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
+		 )
+	echo ^)
+	)
+	echo.
+	echo if "%%TERMINAL%%" == "mintty" ^(
+	echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
+	echo ^)
 ) > "%Start_cmd%" || goto :fail
 
-:: launching Bash once to initialize user home dir
-call "%Start_cmd%" whoami
-
-set Bashrc_sh=%INSTALL_ROOT%\home\.bashrc
+set Bashrc_sh=%INSTALL_ROOT%home\.bashrc
 
 if not "%PROXY_HOST%" == "" (
     echo Adding proxy settings for host [%COMPUTERNAME%] to [home/.bashrc]...
