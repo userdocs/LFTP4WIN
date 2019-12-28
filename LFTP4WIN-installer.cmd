@@ -75,9 +75,9 @@ set GRP=
 set SHELL=/bin/bash
 
 if not exist "%INSTALL_TEMP%" (
-	md "%LFTP4WIN_ROOT%"
-	md "%LFTP4WIN_ROOT%\etc"
-	md "%INSTALL_TEMP%"
+    md "%LFTP4WIN_ROOT%"
+    md "%LFTP4WIN_ROOT%\etc"
+    md "%INSTALL_TEMP%"
 )
 
 :: https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
@@ -154,8 +154,8 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
 "%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-   "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
-   "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
+    "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
+    "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
 )
 
 set Updater_cmd=%LFTP4WIN_BASE%LFTP4WIN-updater.cmd
@@ -168,9 +168,9 @@ echo.
     echo.
     echo set LFTP4WIN_BASE=%%~dp0
     echo set LFTP4WIN_ROOT=%%~dp0system
-	echo set INSTALL_TEMP=%%~dp0system\tmp
+    echo set INSTALL_TEMP=%%~dp0system\tmp
     echo.
-	echo set CYGWIN_SETUP=%CYGWIN_SETUP%
+    echo set CYGWIN_SETUP=%CYGWIN_SETUP%
     echo set CORE_UPDATE=yes
     echo set PATH=%%LFTP4WIN_ROOT%%\bin
     echo set USERNAME=%LFTP4WIN_USERNAME%
@@ -197,12 +197,12 @@ echo.
     echo     echo ###########################################################
     echo     echo.
     echo     echo Downloading Cygwin Setup and the core-update-requirements files...
-	echo.
+    echo.
     echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
     echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
-	echo.
+    echo.
     echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
-	echo.	
+    echo.
     echo     "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" --no-admin ^^
     echo     --site %CYGWIN_MIRROR% ^^
     echo     --root "%%LFTP4WIN_ROOT%%" ^^
@@ -218,13 +218,13 @@ echo.
         echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
     )
     echo     echo.
-	echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
+    echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
     echo ^)
-	echo.
+    echo.
     echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
     echo.
-	echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
-	echo.
+    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
+    echo.
     echo echo.
     echo echo ###########################################################
     echo echo # Updating [LFTP4WIN Portable] succeeded.
@@ -265,8 +265,8 @@ echo.
     if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
         echo #
         echo lftp4win_core=$(cygpath -m "$LFTP4WIN_ROOT/../"^)
-		echo #
-		echo if [[ -f /.core-installed ^&^& $CORE_UPDATE = 'yes' ]]; then
+        echo #
+        echo if [[ -f /.core-installed ^&^& $CORE_UPDATE = 'yes' ]]; then
         echo     echo "*******************************************************************************"
         echo     echo "* Updating LFTP4WIN CORE..."
         echo     echo "*******************************************************************************"
@@ -275,25 +275,25 @@ echo.
         echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
         echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
         echo     [[ -d /applications ]] ^&^& touch /.core-installed
-		echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
+        echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
         echo fi
         echo #
         echo source "/.core-cleanup"
         echo #
     )
-	echo #
-	echo # Installing apt-cyg package manager if not yet installed or update it silently if it is.
-	echo #
-	echo if [[ ! -x /usr/local/bin/apt-cyg ]]; then
-	echo     echo "*******************************************************************************"
-	echo     echo "* Installing apt-cyg..."
-	echo     echo "*******************************************************************************"
-	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
-	echo     chmod +x /usr/local/bin/apt-cyg
-	echo else
-	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
-	echo     chmod +x /usr/local/bin/apt-cyg
-	echo fi
+    echo #
+    echo # Installing apt-cyg package manager if not yet installed or update it silently if it is.
+    echo #
+    echo if [[ ! -x /usr/local/bin/apt-cyg ]]; then
+    echo     echo "*******************************************************************************"
+    echo     echo "* Installing apt-cyg..."
+    echo     echo "*******************************************************************************"
+    echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
+    echo     chmod +x /usr/local/bin/apt-cyg
+    echo else
+    echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
+    echo     chmod +x /usr/local/bin/apt-cyg
+    echo fi
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
@@ -315,8 +315,8 @@ echo.
     echo set GRP=
     echo set SHELL=/bin/bash
     echo.
-	echo set TERMINAL=mintty
-	echo.
+    echo set TERMINAL=mintty
+    echo.
     echo ^(
     echo     echo # /etc/fstab
     echo     echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
@@ -328,8 +328,8 @@ echo.
     echo     echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
     echo ^) ^> "%%LFTP4WIN_ROOT%%\etc\fstab"
     echo.
-	echo IF EXIST "%%LFTP4WIN_ROOT%%\etc\fstab" "%%LFTP4WIN_ROOT%%\bin\sed" -i 's/\r$//' "%%LFTP4WIN_ROOT%%\etc\fstab"
-	echo.
+    echo IF EXIST "%%LFTP4WIN_ROOT%%\etc\fstab" "%%LFTP4WIN_ROOT%%\bin\sed" -i 's/\r$//' "%%LFTP4WIN_ROOT%%\etc\fstab"
+    echo.
     echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
     echo.
     echo set LIST=
@@ -338,22 +338,21 @@ echo.
     echo start "" "%%LFTP4WIN_ROOT%%\applications\kitty\kageant.exe" %%LIST:~1%%
     echo ^)
     echo.
-	if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-	echo if "%%TERMINAL%%" == "conemu" ^(
-		 if "%CYGWIN_ARCH%" == "64" (
-			 echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
-		 ) else (
-			 echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
-		 )
-	echo ^)
-	)
-	echo.
-	echo if "%%TERMINAL%%" == "mintty" ^(
-	echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
-	echo ^)
+    if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
+    echo if "%%TERMINAL%%" == "conemu" ^(
+         if "%CYGWIN_ARCH%" == "64" (
+             echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
+         ) else (
+             echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
+         )
+    echo ^)
+    )
+    echo.
+    echo if "%%TERMINAL%%" == "mintty" ^(
+    echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
+    echo ^)
 ) > "%Start_cmd%" || goto :fail
 
-echo.
 echo ###########################################################
 echo # Installing [LFTP4WIN Portable] succeeded.
 echo ###########################################################
