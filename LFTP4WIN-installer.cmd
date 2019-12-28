@@ -175,9 +175,11 @@ echo.
     echo     echo.
     echo     echo Downloading Cygwin Setup and the core-update-requirements files...
 	echo.
-    echo     "%%SystemRoot%%\System32\bitsadmin" /transfer cygwin /download /priority normal /DYNAMIC "https://cygwin.org/%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" ^> NUL 
-    echo     "%%SystemRoot%%\System32\bitsadmin" /transfer updates /download /priority normal /DYNAMIC "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/core-update-requirements" "%%LFTP4WIN_ROOT%%\tmp\core-update-requirements" ^> NUL
-    echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\core-update-requirements"
+    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
+    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
+    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
+	echo.
+    echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
 	echo.	
     echo     "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" --no-admin ^^
     echo     --site %CYGWIN_MIRROR% ^^
@@ -257,10 +259,13 @@ echo.
         echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
         echo     echo "Download URL=$lftp4win_core_url"
         echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
-        echo     bsdtar -X '/core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
+        echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
         echo     [[ -d /applications ]] ^&^& touch /.core-installed
 		echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
         echo fi
+        echo #
+        echo source "$(PWD)/system/.core-cleanup"
+        echo #
     )
 	echo #
 	echo # Installing apt-cyg package manager if not yet installed or update it silently if it is.
@@ -275,9 +280,6 @@ echo.
 	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
 	echo     chmod +x /usr/local/bin/apt-cyg
 	echo fi
-	echo #
-	echo source "$(PWD)/system/core-cleanup"
-	echo #
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
