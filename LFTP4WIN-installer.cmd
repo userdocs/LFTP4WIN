@@ -110,10 +110,10 @@ if "%CYGWIN_PACKET_MANAGER%" == "yes" (
 echo Downloading some files, it can take a minute or two...
 echo.
 
-bitsadmin /transfer cygwin /download /priority normal /DYNAMIC "https://cygwin.org/%CYGWIN_SETUP%" "%INSTALL_TEMP%\%CYGWIN_SETUP%" > NUL || goto :fail
+bitsadmin /transfer cygwin /download /priority FOREGROUND /DYNAMIC "https://cygwin.org/%CYGWIN_SETUP%" "%INSTALL_TEMP%\%CYGWIN_SETUP%" > NUL || goto :fail
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    bitsadmin /transfer lftp4win /download /priority normal /DYNAMIC "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\lftp4win.zip" > NUL || goto :fail
+    bitsadmin /transfer lftp4win /download /priority FOREGROUND /DYNAMIC "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\lftp4win.zip" > NUL || goto :fail
 )
 
 echo Running Cygwin setup...
