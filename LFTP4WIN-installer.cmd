@@ -76,6 +76,7 @@ set SHELL=/bin/bash
 
 if not exist "%INSTALL_TEMP%" (
 	md "%LFTP4WIN_ROOT%"
+	md "%LFTP4WIN_ROOT%\etc"
 	md "%INSTALL_TEMP%"
 )
 
@@ -133,6 +134,28 @@ echo.
 
 if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
     rd /s /q "%LFTP4WIN_ROOT%\.pkg-cache"
+)
+
+(
+    echo # /etc/fstab
+    echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-conemu.cmd
+    echo #
+    echo #    This file is read once by the first process in a Cygwin process tree.
+    echo #    To pick up changes, restart all Cygwin processes.  For a description
+    echo #    see https://cygwin.com/cygwin-ug-net/using.html#mount-table
+    echo #
+    echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
+) > "%LFTP4WIN_ROOT%\etc\fstab"
+
+:: Configure our Cygwin Environment
+"%LFTP4WIN_ROOT%\bin\mkgroup.exe" -c > system/etc/group || goto :fail
+"%LFTP4WIN_ROOT%\bin\bash.exe" -c "echo ""$USERNAME:*:1001:$(system/bin/mkpasswd -c | system/bin/cut -d':' -f 4):$(system/bin/mkpasswd -c | system/bin/cut -d':' -f 5):$(system/bin/cygpath.exe -u ""%~dp0home""):/bin/bash""" > system/etc/passwd || goto :fail
+:: Fix a symlink bug in Cygwin
+"%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
+
+if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
+   "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
+   "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
 )
 
 set Updater_cmd=%LFTP4WIN_BASE%LFTP4WIN-updater.cmd
@@ -218,16 +241,6 @@ echo.
     echo pause
     echo exit /1
 ) > "%Updater_cmd%" || goto :fail
-
-if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-   "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
-   "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
-)
-:: Configure our Cygwin Environment
-"%LFTP4WIN_ROOT%\bin\mkgroup.exe" -c > system/etc/group || goto :fail
-"%LFTP4WIN_ROOT%\bin\bash.exe" -c "echo ""$USERNAME:*:1001:$(system/bin/mkpasswd -c | system/bin/cut -d':' -f 4):$(system/bin/mkpasswd -c | system/bin/cut -d':' -f 5):$(system/bin/cygpath.exe -u ""%~dp0home""):/bin/bash""" > system/etc/passwd || goto :fail
-:: Fix a symlink bug in Cygwin
-"%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
 
 set Init_sh=%LFTP4WIN_ROOT%\portable-init.sh
 echo Creating [%Init_sh%]...
