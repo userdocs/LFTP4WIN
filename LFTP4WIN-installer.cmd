@@ -177,7 +177,6 @@ echo.
 	echo.
     echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
     echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
-    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
 	echo.
     echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
 	echo.	
@@ -199,6 +198,8 @@ echo.
 	echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
     echo ^)
 	echo.
+    echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
+    echo.
 	echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
 	echo.
     echo echo.
@@ -264,7 +265,7 @@ echo.
 		echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
         echo fi
         echo #
-        echo source "$(PWD)/system/.core-cleanup"
+        echo source "/.core-cleanup"
         echo #
     )
 	echo #
