@@ -275,6 +275,9 @@ echo.
 	echo     curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> /usr/local/bin/apt-cyg
 	echo     chmod +x /usr/local/bin/apt-cyg
 	echo fi
+	echo #
+	echo source "$(PWD)/system/core-cleanup"
+	echo #
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
