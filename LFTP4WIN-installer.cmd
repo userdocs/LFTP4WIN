@@ -138,7 +138,7 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
 
 (
     echo # /etc/fstab
-    echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-conemu.cmd
+    echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
     echo #
     echo #    This file is read once by the first process in a Cygwin process tree.
     echo #    To pick up changes, restart all Cygwin processes.  For a description
@@ -223,7 +223,7 @@ echo.
     echo.
     echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
     echo.
-    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
+    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
     echo.
     echo echo.
     echo echo ###########################################################
@@ -330,7 +330,7 @@ echo.
     echo.
     echo IF EXIST "%%LFTP4WIN_ROOT%%\etc\fstab" "%%LFTP4WIN_ROOT%%\bin\sed" -i 's/\r$//' "%%LFTP4WIN_ROOT%%\etc\fstab"
     echo.
-    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" "%%LFTP4WIN_ROOT%%\portable-init.sh"
+    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
     echo.
     echo set LIST=
     echo for %%%%x in ^("%%LFTP4WIN_BASE%%keys\*.ppk"^) do set LIST=!LIST! "%%%%x"
