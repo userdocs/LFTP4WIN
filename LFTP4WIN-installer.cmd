@@ -250,6 +250,8 @@ echo.
     echo #
     echo ## Map Current Windows User to root user
     echo #
+	echo unset HISTFILE
+	echo #
     echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
     echo if ! grep -F "$USER_SID" /etc/passwd ^&^>/dev/null; then
     echo     echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
@@ -288,6 +290,8 @@ echo.
     echo ## Installing apt-cyg package manager to home folder ~/bin
     echo #
     echo curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> ~/bin/apt-cyg
+    echo #
+	echo set HISTFILE
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
