@@ -1,4 +1,4 @@
-# LFTP4WIN Installer.
+# LFTP4WIN Installer
 
 This is a deployment tool that allows you to install a portable and configured Cygwin x64 installation to use with the [LFTP4WIN-CORE](https://github.com/userdocs/LFTP4WIN-CORE) solution.
 
@@ -19,17 +19,18 @@ When the installer is finished it will look like this.
 ![packages](https://github.com/userdocs/LFTP4WIN-CORE/raw/master/help/docs/readme-images/install-complete.jpg)
 
 Note: If the install was not complete because your firewall blocks parts of the setup (curl) you can simply run the installer over to download the required files.
+
 ## Post Installation
 
 `cmd` files what they do:
 
 `Double Click Me - WinSCP Startup.cmd` - Starts WinSCP and `kageant` if key files are present.
 
-`LFTP4WIN-conemu.cmd` - Starts ConEmu in the home folder and `kageant` if keys files are present.
-
-`LFTP4WIN-import.cmd` - Imports your settings from another installation (2.0 or greater) by running this script.
+`LFTP4WIN-import.cmd` - Imports your settings from another installation (2.0 or greater) by running this script and selecting the previous LFTP4WIN installation.
 
 `LFTP4WIN-installer.cmd` - The main installation script. Installing this again will reset everything.
+
+`LFTP4WIN-terminal.cmd` - Starts a local terminal session in the home folder and loads your key files via  `kageant` if keys files are present.
 
 `LFTP4WIN-updater.cmd` - Updates Cygwin and `LFTP4WIN-CORE` with no settings lost.
 
@@ -43,8 +44,29 @@ All major features are handled by custom commands you can use once connected aft
 
 ## Cygwin
 
-Run the `LFTP4WIN-conemu.cmd` to access Cygwin bash via the ConEmu terminal.
+Run the `LFTP4WIN-terminal.cmd` to access Cygwin bash via the ConEmu terminal.
 
-The installation installs `apt-cyg` a cygwin `apt` style packet manager. Read more here.
+The installation installs `apt-cyg` a Cygwin `apt` style packet manager. Read more here.
 
 [https://github.com/kou1okada/apt-cyg](https://github.com/kou1okada/apt-cyg)
+
+## Updating
+
+You can updated the installation using this script - `LFTP4WIN-updater.cmd`
+
+It will present you two yes or no options.
+
+`Update Cygwin? [y|n]:` - `y` or `n`
+
+`y` - This will start the Cygwin update process which leads to the second question.
+
+`n` - Will skip the Cygwin update and just skip to the `LFTP4WIN-CORE` update.
+
+`Open Cygwin packet manager? [y|n]:` - `y` or `n`
+
+`y` - This will open the Cygwin packet manger and allow you to add or remove packages.
+
+`n` - This will run the updater with no interaction. It will update installed and base components of the Cygwin installation.
+
+`LFTP4WIN-CORE` is always updated by pulling the repo from Github and unpacking over your existing installation.
+
