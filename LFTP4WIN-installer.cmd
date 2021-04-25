@@ -44,7 +44,7 @@ set CYGWIN_PACKAGES=wget,ca-certificates,gnupg,bsdtar,bash-completion,curl,lftp,
 set INSTALL_LFTP4WIN_CORE=yes
 
 :: change the URL to the closest mirror https://cygwin.com/mirrors.html
-set CYGWIN_MIRROR=https://cygwin.mirror.uk.sargasso.net/
+set CYGWIN_MIRROR=https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin/
 
 :: one of: auto,64,32 - specifies if 32 or 64 bit version should be installed or automatically detected based on current OS architecture
 set CYGWIN_ARCH=auto
