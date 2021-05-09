@@ -361,7 +361,8 @@ echo.
 del /q "%INSTALL_TEMP%\%CYGWIN_SETUP%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    del /q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win.zip"
+    DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win.zip"
+    RMDIR /S /Q "%LFTP4WIN_BASE%\docs"
 )
 
 timeout /T 60
