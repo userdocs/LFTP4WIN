@@ -34,7 +34,7 @@ Once Cygwin has been installed `LFTP4WIN-CORE` will be downloaded and applied to
 
 When the installer is finished it will look like this.
 
-![packages](https://github.com/userdocs/LFTP4WIN-CORE/raw/master/help/docs/readme-images/install-complete.jpg)
+![packages](https://github.com/userdocs/LFTP4WIN-CORE/raw/master/docs/assets/img-docs/install-complete.jpg)
 
 Note: If the install was not complete because your firewall blocks parts of the setup (curl) you can simply run the installer over to download the required files.
 
