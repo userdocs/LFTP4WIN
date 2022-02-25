@@ -253,11 +253,9 @@ echo.
 	echo unset HISTFILE
 	echo #
     echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
-    echo if ! grep -F "$USER_SID" /etc/passwd ^&^>/dev/null; then
-    echo     echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
-    echo     mkgroup -c ^> /etc/group
-    echo     echo "$USERNAME:*:1001:$(mkpasswd -c | cut -d':' -f 4):$(mkpasswd -c | cut -d':' -f 5):$HOME:/bin/bash" ^> /etc/passwd
-    echo fi
+    echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
+    echo mkgroup -c ^> /etc/group
+    echo echo "$USERNAME:*:1001:$(mkpasswd -c | cut -d':' -f 4):$(mkpasswd -c | cut -d':' -f 5):$HOME:/bin/bash" ^> /etc/passwd
     echo #
     echo ## Create required directories
     echo #
