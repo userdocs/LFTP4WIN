@@ -69,7 +69,7 @@ set DELETE_CYGWIN_PACKAGE_CACHE=yes
 
 echo.
 echo ###########################################################
-echo # Installing [Cygwin Portable]...
+echo # Installing [Cygwin Portable]
 echo ###########################################################
 echo.
 
@@ -123,7 +123,7 @@ if "%CYGWIN_PACKET_MANAGER%" == "yes" (
   set CYGWIN_PACKET_MANAGER=--package-manager
 )
 
-echo Downloading some files, it can take a minute or two...
+echo Downloading some files, it can take a minute or two
 echo.
 
 call :download "https://cygwin.org/%CYGWIN_SETUP_EXE%" "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%"
@@ -132,7 +132,7 @@ if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
   call :download "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\lftp4win_core.zip"
 )
 
-echo Running Cygwin setup...
+echo Running Cygwin setup
 echo.
 
 "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" --no-admin ^
@@ -175,7 +175,7 @@ if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
 
 set Updater_cmd=%LFTP4WIN_BASE%LFTP4WIN-updater.cmd
 echo.
-echo Creating updater [%Updater_cmd%]...
+echo Creating updater [%Updater_cmd%]
 echo.
 (
   echo @echo off
@@ -208,10 +208,10 @@ echo.
   echo.
   echo if "%%REPLY%%" == "y" ^(
   echo     echo ###########################################################
-  echo     echo # Updating Cygwin [LFTP4WIN Portable]...
+  echo     echo # Updating Cygwin [LFTP4WIN Portable]
   echo     echo ###########################################################
   echo     echo.
-  echo     echo Downloading Cygwin Setup and the core-update-requirements files...
+  echo     echo Downloading Cygwin Setup and the core-update-requirements files
   echo.
   echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP_EXE%" ^> "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%"
   echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%INSTALL_TEMP%%\.core-update-requirements"
@@ -258,7 +258,7 @@ echo.
 ) > "%Updater_cmd%" || goto :fail
 
 set Init_sh=%LFTP4WIN_ROOT%\portable-init.sh
-echo Creating [%Init_sh%]...
+echo Creating [%Init_sh%]
 echo.
 (
   echo #!/usr/bin/env bash
@@ -268,7 +268,7 @@ echo.
   echo unset HISTFILE
   echo #
   echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
-  echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
+  echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd"
   echo mkgroup -c ^> /etc/group
   echo echo "$USERNAME:*:1001:$(mkpasswd -c | cut -d':' -f 4):$(mkpasswd -c | cut -d':' -f 5):$HOME:/bin/bash" ^> /etc/passwd
   echo #
@@ -310,7 +310,7 @@ echo.
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
 
 set Start_cmd=%LFTP4WIN_BASE%LFTP4WIN-terminal.cmd
-echo Creating launcher [%Start_cmd%]...
+echo Creating launcher [%Start_cmd%]
 echo.
 (
   echo @echo off
@@ -369,7 +369,6 @@ echo # Installing [LFTP4WIN Portable] succeeded.
 echo ###########################################################
 echo.
 echo Use [%Start_cmd%] to launch LFTP4WIN Portable.
-echo.
 
 del /q "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
 
@@ -396,7 +395,7 @@ goto :eof
 
 :download
   if exist "%2" (
-    echo Deleting existing [%2]...
+    echo Deleting existing [%2]
     del "%2" || goto :fail
   )
 
@@ -423,7 +422,7 @@ goto :eof
     set http_proxy=http://%PROXY_HOST%:%PROXY_PORT%
     set https_proxy=http://%PROXY_HOST%:%PROXY_PORT%
   )
-  echo Downloading %1 to %2 using curl...
+  echo Downloading %1 to %2 using curl
   curl -sL %1 -# -o %2 || exit /B 1
   exit /B 0
 
@@ -431,7 +430,7 @@ goto :eof
   :: create VB script that can download files
   :: not using PowerShell which may be blocked by group policies
   set DOWNLOADER=%INSTALL_ROOT%downloader.vbs
-  echo Creating [%DOWNLOADER%] script...
+  echo Creating [%DOWNLOADER%] script
   if "%PROXY_HOST%" == "" (
     set DOWNLOADER_PROXY=.
   ) else (
@@ -448,7 +447,7 @@ goto :eof
     echo   reqType = "MSXML2.XMLHTTP.6.0"
     echo   Set req = CreateObject(reqType^)
     echo End If
-    echo WScript.Echo "Downloading '" ^& url ^& "' to '" ^& target ^& "' using '" ^& reqType ^& "'..."
+    echo WScript.Echo "Downloading '" ^& url ^& "' to '" ^& target ^& "' using '" ^& reqType ^& "'"
     echo%DOWNLOADER_PROXY%
     echo req.Open "GET", url, False
     echo req.Send
@@ -481,6 +480,6 @@ goto :eof
     set http_proxy=http://%PROXY_HOST%:%PROXY_PORT%
     set https_proxy=http://%PROXY_HOST%:%PROXY_PORT%
   )
-  echo Downloading %1 to %2 using powershell...
+  echo Downloading %1 to %2 using powershell
   powershell "[Net.ServicePointManager]::SecurityProtocol = 'tls12, tls11, tls'; (New-Object Net.WebClient).DownloadFile('%1', '%2')" || exit /B 1
   exit /B 0
