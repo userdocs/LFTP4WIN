@@ -129,7 +129,7 @@ echo.
 call :download "https://cygwin.org/%CYGWIN_SETUP_EXE%" "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-  call :download "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\master.zip"
+  call :download "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\lftp4win_core.zip"
 )
 
 echo Running Cygwin setup...
@@ -169,7 +169,7 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
 "%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-  "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\master.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
+  "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win_core.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
   "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
 )
 
@@ -290,8 +290,8 @@ echo.
     echo     echo "* Updating LFTP4WIN CORE..."
     echo     echo "*******************************************************************************"
     echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
-    echo     echo "Download URL=$lftp4win_core_url"
-    echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
+    echo     echo -e "\nDownload URL=$lftp4win_core_url\n"
+    echo     curl -sL "$lftp4win_core_url" ^> "lftp4win_core.zip"
     echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
     echo     [[ -d /applications ]] ^&^& touch /.core-installed
     echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
@@ -374,7 +374,7 @@ echo.
 del /q "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-  DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\master.zip"
+  DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win_core.zip"
   RMDIR /S /Q "%LFTP4WIN_BASE%\docs"
 )
 
