@@ -1,18 +1,18 @@
 @echo off
+
+:: Copyright 2023 by userdocs and contributors for LFTP4WIN installer derived from https://github.com/vegardit/cygwin-portable-installer
+:: Copyright 2017-2023 by Vegard IT GmbH (https://vegardit.com) and the cygwin-portable-installer contributors.
 ::
-:: Copyright 2019 by userdocs and contributors for LFTP4WIN installer derived from https://github.com/vegardit/cygwin-portable-installer
-:: Copyright 2017-2019 by Vegard IT GmbH (https://vegardit.com) and the cygwin-portable-installer contributors.
-::
+:: LFTP4WIN installer derived from cygwin-portable-installer
+:: SPDX-FileCopyrightText: © userdocs and contributors
+:: SPDX-FileContributor: userdocs
 :: SPDX-License-Identifier: Apache-2.0
 ::
-:: LFTPWIN installer derived from cygwin-portable-installer
-:: @author userdocs
-:: @contributors
-::
 :: cygwin-portable-installer
-:: @author Sebastian Thomschke, Vegard IT GmbH
-:: @contributor userdocs bofhbug xnum
-::
+:: SPDX-FileCopyrightText: © Vegard IT GmbH (https://vegardit.com) and contributors
+:: SPDX-FileContributor: Sebastian Thomschke, Vegard IT GmbH
+:: SPDX-License-Identifier: Apache-2.0
+
 :: ABOUT
 :: =====
 :: LFTP4WIN installer
@@ -24,12 +24,20 @@
 :: This provides a a fully functional Cygwin portable platform for use with the LFTP4WIN project.
 :: Environment customization is no longer designed to be fully self contained and is partially provided via the LFTP4WIN-CORE
 :: There are still some critical configuration options available below for the installation.
+:: if executed with "--debug" print all executed commands
+for %%a in (%*) do (
+  if [%%~a]==[--debug] echo on
+)
 
 :: ============================================================================================================
 :: CONFIG CUSTOMIZATION START
 :: ============================================================================================================
 
 :: You can customize the following variables to your needs before running the batch file:
+
+:: set proxy if required (unfortunately Cygwin setup.exe does not have commandline options to specify proxy user credentials)
+set PROXY_HOST=
+set PROXY_PORT=8080
 
 :: Choose a user name that will be used to configure Cygwin. This user will be a clone of the account running the installation script renamed as the setting chosen.
 set LFTP4WIN_USERNAME=LFTP4WIN
@@ -95,13 +103,20 @@ if "%CYGWIN_ARCH%" == "auto" (
 
 :: download Cygwin 32 or 64 setup exe depending on detected architecture
 if "%CYGWIN_ARCH%" == "64" (
-  set CYGWIN_SETUP=setup-x86_64.exe
+  set CYGWIN_SETUP_EXE=setup-x86_64.exe
 ) else (
-  set CYGWIN_SETUP=setup-x86.exe
+  set CYGWIN_SETUP_EXE=setup-x86.exe
 )
 
-if exist "%INSTALL_TEMP%\%CYGWIN_SETUP%" (
-  del "%INSTALL_TEMP%\%CYGWIN_SETUP%" || goto :fail
+:: Cygwin command line options: https://cygwin.com/faq/faq.html#faq.setup.cli
+if "%PROXY_HOST%" == "" (
+  set CYGWIN_PROXY=
+) else (
+  set CYGWIN_PROXY=--proxy "%PROXY_HOST%:%PROXY_PORT%"
+)
+
+if exist "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" (
+  del "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" || goto :fail
 )
 
 if "%CYGWIN_PACKET_MANAGER%" == "yes" (
@@ -111,16 +126,16 @@ if "%CYGWIN_PACKET_MANAGER%" == "yes" (
 echo Downloading some files, it can take a minute or two...
 echo.
 
-bitsadmin /transfer cygwin /download /priority FOREGROUND /DYNAMIC "https://cygwin.org/%CYGWIN_SETUP%" "%INSTALL_TEMP%\%CYGWIN_SETUP%" > NUL || goto :fail
+call :download "https://cygwin.org/%CYGWIN_SETUP_EXE%" "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    bitsadmin /transfer lftp4win /download /priority FOREGROUND /DYNAMIC "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\lftp4win.zip" > NUL || goto :fail
+  call :download "https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip" "%INSTALL_TEMP%\master.zip"
 )
 
 echo Running Cygwin setup...
 echo.
 
-"%INSTALL_TEMP%\%CYGWIN_SETUP%" --no-admin ^
+"%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" --no-admin ^
   --site "%CYGWIN_MIRROR%" ^
   --root "%LFTP4WIN_ROOT%" ^
   --local-package-dir "%LFTP4WIN_ROOT%\.pkg-cache" ^
@@ -154,7 +169,7 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
 "%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-  "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
+  "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\master.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
   "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
 )
 
@@ -170,7 +185,7 @@ echo.
   echo set LFTP4WIN_ROOT=%%~dp0system
   echo set INSTALL_TEMP=%%~dp0system\tmp
   echo.
-  echo set CYGWIN_SETUP=%CYGWIN_SETUP%
+  echo set CYGWIN_SETUP_EXE=%CYGWIN_SETUP_EXE%
   echo set CORE_UPDATE=yes
   echo set PATH=%%LFTP4WIN_ROOT%%\bin
   echo set USERNAME=%LFTP4WIN_USERNAME%
@@ -198,12 +213,12 @@ echo.
   echo     echo.
   echo     echo Downloading Cygwin Setup and the core-update-requirements files...
   echo.
-  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
-  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
+  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP_EXE%" ^> "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%"
+  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%INSTALL_TEMP%%\.core-update-requirements"
   echo.
-  echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
+  echo     set /p C_U_R=^<"%%INSTALL_TEMP%%\.core-update-requirements"
   echo.
-  echo     "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" --no-admin ^^
+  echo     "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" --no-admin ^^
   echo     --site %CYGWIN_MIRROR% ^^
   echo     --root "%%LFTP4WIN_ROOT%%" ^^
   echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
@@ -218,7 +233,7 @@ echo.
     echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
   )
   echo     echo.
-  echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
+  echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
   echo ^)
   echo.
   echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
@@ -250,8 +265,8 @@ echo.
   echo #
   echo ## Map Current Windows User to root user
   echo #
-echo unset HISTFILE
-echo #
+  echo unset HISTFILE
+  echo #
   echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
   echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
   echo mkgroup -c ^> /etc/group
@@ -289,7 +304,7 @@ echo #
   echo #
   echo curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> ~/bin/apt-cyg
   echo #
-echo set HISTFILE
+  echo set HISTFILE
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
@@ -356,10 +371,10 @@ echo.
 echo Use [%Start_cmd%] to launch LFTP4WIN Portable.
 echo.
 
-del /q "%INSTALL_TEMP%\%CYGWIN_SETUP%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
+del /q "%INSTALL_TEMP%\%CYGWIN_SETUP_EXE%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-  DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win.zip"
+  DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\master.zip"
   RMDIR /S /Q "%LFTP4WIN_BASE%\docs"
 )
 
@@ -368,7 +383,7 @@ goto :eof
 
 :fail
   if exist "%DOWNLOADER%" (
-      del "%DOWNLOADER%"
+    del "%DOWNLOADER%"
   )
   echo.
   echo ###########################################################
@@ -377,3 +392,94 @@ goto :eof
   echo.
   timeout /T 60
   exit /b 1
+
+:download
+  if exist "%2" (
+    echo Deleting existing [%2]...
+    del "%2" || goto :fail
+  )
+
+  where /q curl
+  if %ERRORLEVEL% EQU 0 (
+    call :download_with_curl %1 %2
+  )
+
+  if errorlevel 1 (
+    call :download_with_powershell %1 %2
+  )
+
+  if errorlevel 1 (
+    call :download_with_vbs %1 %2 || goto :fail
+  )
+
+  exit /B 0
+
+:download_with_curl
+  if "%PROXY_HOST%" == "" (
+    set "http_proxy="
+    set "https_proxy="
+  ) else (
+    set http_proxy=http://%PROXY_HOST%:%PROXY_PORT%
+    set https_proxy=http://%PROXY_HOST%:%PROXY_PORT%
+  )
+  echo Downloading %1 to %2 using curl...
+  curl -sL %1 -# -o %2 || exit /B 1
+  exit /B 0
+
+:download_with_vbs
+  :: create VB script that can download files
+  :: not using PowerShell which may be blocked by group policies
+  set DOWNLOADER=%INSTALL_ROOT%downloader.vbs
+  echo Creating [%DOWNLOADER%] script...
+  if "%PROXY_HOST%" == "" (
+    set DOWNLOADER_PROXY=.
+  ) else (
+    set DOWNLOADER_PROXY= req.SetProxy 2, "%PROXY_HOST%:%PROXY_PORT%", ""
+  )
+
+  (
+    echo url = Wscript.Arguments(0^)
+    echo target = Wscript.Arguments(1^)
+    echo On Error Resume Next
+    echo reqType = "WinHttp.WinHttpRequest.5.1"
+    echo Set req = CreateObject(reqType^)
+    echo If req Is Nothing Then
+    echo   reqType = "MSXML2.XMLHTTP.6.0"
+    echo   Set req = CreateObject(reqType^)
+    echo End If
+    echo WScript.Echo "Downloading '" ^& url ^& "' to '" ^& target ^& "' using '" ^& reqType ^& "'..."
+    echo%DOWNLOADER_PROXY%
+    echo req.Open "GET", url, False
+    echo req.Send
+    echo If Err.Number ^<^> 0 Then
+    echo   WScript.Quit 1
+    echo End If
+    echo If req.Status ^<^> 200 Then
+    echo   WScript.Echo "FAILED to download: HTTP Status " ^& req.Status
+    echo   WScript.Quit 1
+    echo End If
+    echo Set buff = CreateObject("ADODB.Stream"^)
+    echo buff.Open
+    echo buff.Type = 1
+    echo buff.Write req.ResponseBody
+    echo buff.Position = 0
+    echo buff.SaveToFile target
+    echo buff.Close
+    echo.
+  ) >"%DOWNLOADER%" || goto :fail
+
+  cscript //Nologo "%DOWNLOADER%" %1 %2 || exit /B 1
+  del "%DOWNLOADER%"
+  exit /B 0
+
+:download_with_powershell
+  if "%PROXY_HOST%" == "" (
+    set "http_proxy="
+    set "https_proxy="
+  ) else (
+    set http_proxy=http://%PROXY_HOST%:%PROXY_PORT%
+    set https_proxy=http://%PROXY_HOST%:%PROXY_PORT%
+  )
+  echo Downloading %1 to %2 using powershell...
+  powershell "[Net.ServicePointManager]::SecurityProtocol = 'tls12, tls11, tls'; (New-Object Net.WebClient).DownloadFile('%1', '%2')" || exit /B 1
+  exit /B 0
