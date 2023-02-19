@@ -75,37 +75,37 @@ set GRP=
 set SHELL=/bin/bash
 
 if not exist "%INSTALL_TEMP%" (
-    md "%LFTP4WIN_ROOT%"
-    md "%LFTP4WIN_ROOT%\etc"
-    md "%INSTALL_TEMP%"
+  md "%LFTP4WIN_ROOT%"
+  md "%LFTP4WIN_ROOT%\etc"
+  md "%INSTALL_TEMP%"
 )
 
 :: https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
 if "%CYGWIN_ARCH%" == "auto" (
-    if "%PROCESSOR_ARCHITECTURE%" == "x86" (
-        if defined PROCESSOR_ARCHITEW6432 (
-            set CYGWIN_ARCH=64
-        ) else (
-            set CYGWIN_ARCH=32
-        )
+  if "%PROCESSOR_ARCHITECTURE%" == "x86" (
+    if defined PROCESSOR_ARCHITEW6432 (
+      set CYGWIN_ARCH=64
     ) else (
-        set CYGWIN_ARCH=64
+      set CYGWIN_ARCH=32
     )
+  ) else (
+    set CYGWIN_ARCH=64
+  )
 )
 
 :: download Cygwin 32 or 64 setup exe depending on detected architecture
 if "%CYGWIN_ARCH%" == "64" (
-    set CYGWIN_SETUP=setup-x86_64.exe
+  set CYGWIN_SETUP=setup-x86_64.exe
 ) else (
-    set CYGWIN_SETUP=setup-x86.exe
+  set CYGWIN_SETUP=setup-x86.exe
 )
 
 if exist "%INSTALL_TEMP%\%CYGWIN_SETUP%" (
-    del "%INSTALL_TEMP%\%CYGWIN_SETUP%" || goto :fail
+  del "%INSTALL_TEMP%\%CYGWIN_SETUP%" || goto :fail
 )
 
 if "%CYGWIN_PACKET_MANAGER%" == "yes" (
-   set CYGWIN_PACKET_MANAGER=--package-manager
+  set CYGWIN_PACKET_MANAGER=--package-manager
 )
 
 echo Downloading some files, it can take a minute or two...
@@ -121,30 +121,30 @@ echo Running Cygwin setup...
 echo.
 
 "%INSTALL_TEMP%\%CYGWIN_SETUP%" --no-admin ^
- --site "%CYGWIN_MIRROR%" ^
- --root "%LFTP4WIN_ROOT%" ^
- --local-package-dir "%LFTP4WIN_ROOT%\.pkg-cache" ^
- --no-shortcuts ^
- --no-desktop ^
- --delete-orphans ^
- --upgrade-also ^
- --no-replaceonreboot ^
- --quiet-mode ^
- --packages %CYGWIN_PACKAGES% %CYGWIN_PACKET_MANAGER% || goto :fail
+  --site "%CYGWIN_MIRROR%" ^
+  --root "%LFTP4WIN_ROOT%" ^
+  --local-package-dir "%LFTP4WIN_ROOT%\.pkg-cache" ^
+  --no-shortcuts ^
+  --no-desktop ^
+  --delete-orphans ^
+  --upgrade-also ^
+  --no-replaceonreboot ^
+  --quiet-mode ^
+  --packages %CYGWIN_PACKAGES% %CYGWIN_PACKET_MANAGER% || goto :fail
 
 if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
-    rd /s /q "%LFTP4WIN_ROOT%\.pkg-cache"
+  rd /s /q "%LFTP4WIN_ROOT%\.pkg-cache"
 )
 
 (
-    echo # /etc/fstab
-    echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
-    echo #
-    echo #    This file is read once by the first process in a Cygwin process tree.
-    echo #    To pick up changes, restart all Cygwin processes.  For a description
-    echo #    see https://cygwin.com/cygwin-ug-net/using.html#mount-table
-    echo #
-    echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
+  echo # /etc/fstab
+  echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
+  echo #
+  echo #    This file is read once by the first process in a Cygwin process tree.
+  echo #    To pick up changes, restart all Cygwin processes.  For a description
+  echo #    see https://cygwin.com/cygwin-ug-net/using.html#mount-table
+  echo #
+  echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
 ) > "%LFTP4WIN_ROOT%\etc\fstab"
 
 :: Configure our Cygwin Environment
@@ -154,8 +154,8 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
 "%LFTP4WIN_ROOT%\bin\ln.exe" -fsn '../usr/share/terminfo' '/lib/terminfo' || goto :fail
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
-    "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
+  "%LFTP4WIN_ROOT%\bin\bsdtar.exe" -xmf "%INSTALL_TEMP%\lftp4win.zip" --strip-components=1 -C "%LFTP4WIN_BASE%\" || goto :fail
+  "%LFTP4WIN_ROOT%\bin\touch.exe" "%LFTP4WIN_ROOT%\.core-installed"
 )
 
 set Updater_cmd=%LFTP4WIN_BASE%LFTP4WIN-updater.cmd
@@ -163,133 +163,133 @@ echo.
 echo Creating updater [%Updater_cmd%]...
 echo.
 (
-    echo @echo off
-    echo setlocal enabledelayedexpansion
-    echo.
-    echo set LFTP4WIN_BASE=%%~dp0
-    echo set LFTP4WIN_ROOT=%%~dp0system
-    echo set INSTALL_TEMP=%%~dp0system\tmp
-    echo.
-    echo set CYGWIN_SETUP=%CYGWIN_SETUP%
-    echo set CORE_UPDATE=yes
-    echo set PATH=%%LFTP4WIN_ROOT%%\bin
-    echo set USERNAME=%LFTP4WIN_USERNAME%
-    echo set HOME=%%LFTP4WIN_BASE%%home
-    echo set GROUP=None
-    echo set GRP=
-    echo set SHELL=/bin/bash
-    echo echo.
-    echo set /p "REPLY=Update Cygwin? [y|n]: "
-    echo echo.
-    echo.
-    echo if "%%REPLY%%" == "y" ^(
-    echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n]: "
-    echo     echo.
-    echo ^)
-    echo.
-    echo if "%%PACKETMANAGER%%" == "y" ^(
-    echo     set PACKETMANAGER=--package-manager
-    echo ^)
-    echo.
-    echo if "%%REPLY%%" == "y" ^(
-    echo     echo ###########################################################
-    echo     echo # Updating Cygwin [LFTP4WIN Portable]...
-    echo     echo ###########################################################
-    echo     echo.
-    echo     echo Downloading Cygwin Setup and the core-update-requirements files...
-    echo.
-    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
-    echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
-    echo.
-    echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
-    echo.
-    echo     "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" --no-admin ^^
-    echo     --site %CYGWIN_MIRROR% ^^
-    echo     --root "%%LFTP4WIN_ROOT%%" ^^
-    echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
-    echo     --no-shortcuts ^^
-    echo     --no-desktop ^^
-    echo     --delete-orphans ^^
-    echo     --upgrade-also ^^
-    echo     --no-replaceonreboot ^^
-    echo     --quiet-mode ^^
-    echo     --packages ^!C_U_R^! %%PACKETMANAGER%% ^|^| goto :fail
-    if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
-        echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
-    )
-    echo     echo.
-    echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
-    echo ^)
-    echo.
-    echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
-    echo.
-    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
-    echo.
-    echo echo.
-    echo echo ###########################################################
-    echo echo # Updating [LFTP4WIN Portable] succeeded.
-    echo echo ###########################################################
-    echo echo.
-    echo pause
-    echo goto :eof
-    echo echo.
-    echo :fail
-    echo echo ###########################################################
-    echo echo # Updating [LFTP4WIN Portable] FAILED!
-    echo echo ###########################################################
-    echo echo.
-    echo pause
-    echo exit /1
+  echo @echo off
+  echo setlocal enabledelayedexpansion
+  echo.
+  echo set LFTP4WIN_BASE=%%~dp0
+  echo set LFTP4WIN_ROOT=%%~dp0system
+  echo set INSTALL_TEMP=%%~dp0system\tmp
+  echo.
+  echo set CYGWIN_SETUP=%CYGWIN_SETUP%
+  echo set CORE_UPDATE=yes
+  echo set PATH=%%LFTP4WIN_ROOT%%\bin
+  echo set USERNAME=%LFTP4WIN_USERNAME%
+  echo set HOME=%%LFTP4WIN_BASE%%home
+  echo set GROUP=None
+  echo set GRP=
+  echo set SHELL=/bin/bash
+  echo echo.
+  echo set /p "REPLY=Update Cygwin? [y|n]: "
+  echo echo.
+  echo.
+  echo if "%%REPLY%%" == "y" ^(
+  echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n]: "
+  echo     echo.
+  echo ^)
+  echo.
+  echo if "%%PACKETMANAGER%%" == "y" ^(
+  echo     set PACKETMANAGER=--package-manager
+  echo ^)
+  echo.
+  echo if "%%REPLY%%" == "y" ^(
+  echo     echo ###########################################################
+  echo     echo # Updating Cygwin [LFTP4WIN Portable]...
+  echo     echo ###########################################################
+  echo     echo.
+  echo     echo Downloading Cygwin Setup and the core-update-requirements files...
+  echo.
+  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP%" ^> "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%"
+  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
+  echo.
+  echo     set /p C_U_R=^<"%%LFTP4WIN_ROOT%%\tmp\.core-update-requirements"
+  echo.
+  echo     "%%LFTP4WIN_ROOT%%\tmp\%%CYGWIN_SETUP%%" --no-admin ^^
+  echo     --site %CYGWIN_MIRROR% ^^
+  echo     --root "%%LFTP4WIN_ROOT%%" ^^
+  echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
+  echo     --no-shortcuts ^^
+  echo     --no-desktop ^^
+  echo     --delete-orphans ^^
+  echo     --upgrade-also ^^
+  echo     --no-replaceonreboot ^^
+  echo     --quiet-mode ^^
+  echo     --packages ^!C_U_R^! %%PACKETMANAGER%% ^|^| goto :fail
+  if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
+    echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
+  )
+  echo     echo.
+  echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
+  echo ^)
+  echo.
+  echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
+  echo.
+  echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
+  echo.
+  echo echo.
+  echo echo ###########################################################
+  echo echo # Updating [LFTP4WIN Portable] succeeded.
+  echo echo ###########################################################
+  echo echo.
+  echo pause
+  echo goto :eof
+  echo echo.
+  echo :fail
+  echo echo ###########################################################
+  echo echo # Updating [LFTP4WIN Portable] FAILED!
+  echo echo ###########################################################
+  echo echo.
+  echo pause
+  echo exit /1
 ) > "%Updater_cmd%" || goto :fail
 
 set Init_sh=%LFTP4WIN_ROOT%\portable-init.sh
 echo Creating [%Init_sh%]...
 echo.
 (
-    echo #!/usr/bin/env bash
+  echo #!/usr/bin/env bash
+  echo #
+  echo ## Map Current Windows User to root user
+  echo #
+echo unset HISTFILE
+echo #
+  echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
+  echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
+  echo mkgroup -c ^> /etc/group
+  echo echo "$USERNAME:*:1001:$(mkpasswd -c | cut -d':' -f 4):$(mkpasswd -c | cut -d':' -f 5):$HOME:/bin/bash" ^> /etc/passwd
+  echo #
+  echo ## Create required directories
+  echo #
+  echo mkdir -p ~/bin
+  echo #
+  echo ## Adjust the Cygwin packages cache path
+  echo #
+  echo pkg_cache_dir=$(cygpath -w "$LFTP4WIN_ROOT/.pkg-cache"^)
+  echo #
+  echo sed -ri 's#(.*^)\.pkg-cache$#'"\t${pkg_cache_dir//\\/\\\\}"'#' /etc/setup/setup.rc
+  if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
     echo #
-    echo ## Map Current Windows User to root user
+    echo lftp4win_core=$(cygpath -m "$LFTP4WIN_ROOT/../"^)
     echo #
-	echo unset HISTFILE
-	echo #
-    echo USER_SID="$(mkpasswd -c | cut -d':' -f 5)"
-    echo echo "Mapping Windows user '$USER_SID' to cygwin '$USERNAME' in /etc/passwd..."
-    echo mkgroup -c ^> /etc/group
-    echo echo "$USERNAME:*:1001:$(mkpasswd -c | cut -d':' -f 4):$(mkpasswd -c | cut -d':' -f 5):$HOME:/bin/bash" ^> /etc/passwd
+    echo if [[ -f /.core-installed ^&^& $CORE_UPDATE = 'yes' ]]; then
+    echo     echo "*******************************************************************************"
+    echo     echo "* Updating LFTP4WIN CORE..."
+    echo     echo "*******************************************************************************"
+    echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
+    echo     echo "Download URL=$lftp4win_core_url"
+    echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
+    echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
+    echo     [[ -d /applications ]] ^&^& touch /.core-installed
+    echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
+    echo fi
     echo #
-    echo ## Create required directories
-    echo #
-    echo mkdir -p ~/bin
-    echo #
-    echo ## Adjust the Cygwin packages cache path
-    echo #
-    echo pkg_cache_dir=$(cygpath -w "$LFTP4WIN_ROOT/.pkg-cache"^)
-    echo #
-    echo sed -ri 's#(.*^)\.pkg-cache$#'"\t${pkg_cache_dir//\\/\\\\}"'#' /etc/setup/setup.rc
-    if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-        echo #
-        echo lftp4win_core=$(cygpath -m "$LFTP4WIN_ROOT/../"^)
-        echo #
-        echo if [[ -f /.core-installed ^&^& $CORE_UPDATE = 'yes' ]]; then
-        echo     echo "*******************************************************************************"
-        echo     echo "* Updating LFTP4WIN CORE..."
-        echo     echo "*******************************************************************************"
-        echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
-        echo     echo "Download URL=$lftp4win_core_url"
-        echo     curl -sL "$lftp4win_core_url" -o "lftp4win_core.zip"
-        echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
-        echo     [[ -d /applications ]] ^&^& touch /.core-installed
-        echo     rm -f 'lftp4win_core.zip' '.gitattributes' 'LICENSE.txt' 'README.md'
-        echo fi
-        echo #
-        echo source "/.core-cleanup"
-    )
-    echo #
-    echo ## Installing apt-cyg package manager to home folder ~/bin
-    echo #
-    echo curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> ~/bin/apt-cyg
-    echo #
-	echo set HISTFILE
+    echo source "/.core-cleanup"
+  )
+  echo #
+  echo ## Installing apt-cyg package manager to home folder ~/bin
+  echo #
+  echo curl -sL https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg ^> ~/bin/apt-cyg
+  echo #
+echo set HISTFILE
 ) > "%Init_sh%" || goto :fail
 
 "%LFTP4WIN_ROOT%\bin\sed" -i 's/\r$//' "%Init_sh%" || goto :fail
@@ -298,55 +298,55 @@ set Start_cmd=%LFTP4WIN_BASE%LFTP4WIN-terminal.cmd
 echo Creating launcher [%Start_cmd%]...
 echo.
 (
-    echo @echo off
-    echo setlocal enabledelayedexpansion
-    echo.
-    echo set LFTP4WIN_BASE=%%~dp0
-    echo set LFTP4WIN_ROOT=%%~dp0system
-    echo.
-    echo set PATH=%%LFTP4WIN_ROOT%%\bin
-    echo set USERNAME=%LFTP4WIN_USERNAME%
-    echo set HOME=%%LFTP4WIN_BASE%%home
-    echo set GROUP=None
-    echo set GRP=
-    echo set SHELL=/bin/bash
-    echo.
-    echo set TERMINAL=mintty
-    echo.
-    echo ^(
-    echo     echo # /etc/fstab
-    echo     echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
-    echo     echo #
-    echo     echo #    This file is read once by the first process in a Cygwin process tree.
-    echo     echo #    To pick up changes, restart all Cygwin processes.  For a description
-    echo     echo #    see https://cygwin.com/cygwin-ug-net/using.html#mount-table
-    echo     echo #
-    echo     echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
-    echo ^) ^> "%%LFTP4WIN_ROOT%%\etc\fstab"
-    echo.
-    echo IF EXIST "%%LFTP4WIN_ROOT%%\etc\fstab" "%%LFTP4WIN_ROOT%%\bin\sed" -i 's/\r$//' "%%LFTP4WIN_ROOT%%\etc\fstab"
-    echo.
-    echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
-    echo.
-    echo set LIST=
-    echo for %%%%x in ^("%%LFTP4WIN_BASE%%keys\*.ppk"^) do set LIST=!LIST! "%%%%x"
-    echo IF exist "%%LFTP4WIN_BASE%%keys\*.ppk" ^(
-    echo start "" "%%LFTP4WIN_ROOT%%\applications\kitty\kageant.exe" %%LIST:~1%%
-    echo ^)
-    echo.
-    if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    echo if "%%TERMINAL%%" == "conemu" ^(
-         if "%CYGWIN_ARCH%" == "64" (
-             echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
-         ) else (
-             echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
-         )
-    echo ^)
+  echo @echo off
+  echo setlocal enabledelayedexpansion
+  echo.
+  echo set LFTP4WIN_BASE=%%~dp0
+  echo set LFTP4WIN_ROOT=%%~dp0system
+  echo.
+  echo set PATH=%%LFTP4WIN_ROOT%%\bin
+  echo set USERNAME=%LFTP4WIN_USERNAME%
+  echo set HOME=%%LFTP4WIN_BASE%%home
+  echo set GROUP=None
+  echo set GRP=
+  echo set SHELL=/bin/bash
+  echo.
+  echo set TERMINAL=mintty
+  echo.
+  echo ^(
+  echo     echo # /etc/fstab
+  echo     echo # IMPORTANT: this files is recreated on each start by LFTP4WIN-terminal.cmd
+  echo     echo #
+  echo     echo #    This file is read once by the first process in a Cygwin process tree.
+  echo     echo #    To pick up changes, restart all Cygwin processes.  For a description
+  echo     echo #    see https://cygwin.com/cygwin-ug-net/using.html#mount-table
+  echo     echo #
+  echo     echo none /cygdrive cygdrive binary,noacl,posix=0,sparse,user 0 0
+  echo ^) ^> "%%LFTP4WIN_ROOT%%\etc\fstab"
+  echo.
+  echo IF EXIST "%%LFTP4WIN_ROOT%%\etc\fstab" "%%LFTP4WIN_ROOT%%\bin\sed" -i 's/\r$//' "%%LFTP4WIN_ROOT%%\etc\fstab"
+  echo.
+  echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
+  echo.
+  echo set LIST=
+  echo for %%%%x in ^("%%LFTP4WIN_BASE%%keys\*.ppk"^) do set LIST=!LIST! "%%%%x"
+  echo IF exist "%%LFTP4WIN_BASE%%keys\*.ppk" ^(
+  echo start "" "%%LFTP4WIN_ROOT%%\applications\kitty\kageant.exe" %%LIST:~1%%
+  echo ^)
+  echo.
+  if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
+  echo if "%%TERMINAL%%" == "conemu" ^(
+    if "%CYGWIN_ARCH%" == "64" (
+      echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu64.exe" -cmd {Bash::bash}
+    ) else (
+      echo   start "" "%%LFTP4WIN_ROOT%%\applications\conemu\ConEmu.exe" -cmd {Bash::bash}
     )
-    echo.
-    echo if "%%TERMINAL%%" == "mintty" ^(
-    echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
-    echo ^)
+  echo ^)
+  )
+  echo.
+  echo if "%%TERMINAL%%" == "mintty" ^(
+  echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
+  echo ^)
 ) > "%Start_cmd%" || goto :fail
 
 echo ###########################################################
@@ -359,21 +359,21 @@ echo.
 del /q "%INSTALL_TEMP%\%CYGWIN_SETUP%" "%LFTP4WIN_ROOT%\Cygwin.bat" "%LFTP4WIN_ROOT%\Cygwin.ico" "%LFTP4WIN_ROOT%\Cygwin-Terminal.ico"
 
 if "%INSTALL_LFTP4WIN_CORE%" == "yes" (
-    DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win.zip"
-    RMDIR /S /Q "%LFTP4WIN_BASE%\docs"
+  DEL /Q "%LFTP4WIN_BASE%\.gitattributes" "%LFTP4WIN_BASE%\README.md" "%LFTP4WIN_BASE%\LICENSE.txt" "%INSTALL_TEMP%\lftp4win.zip"
+  RMDIR /S /Q "%LFTP4WIN_BASE%\docs"
 )
 
 timeout /T 60
 goto :eof
 
 :fail
-    if exist "%DOWNLOADER%" (
-        del "%DOWNLOADER%"
-    )
-    echo.
-    echo ###########################################################
-    echo # Installing [LFTP4WIN Portable] FAILED!
-    echo ###########################################################
-    echo.
-    timeout /T 60
-    exit /b 1
+  if exist "%DOWNLOADER%" (
+      del "%DOWNLOADER%"
+  )
+  echo.
+  echo ###########################################################
+  echo # Installing [LFTP4WIN Portable] FAILED!
+  echo ###########################################################
+  echo.
+  timeout /T 60
+  exit /b 1
