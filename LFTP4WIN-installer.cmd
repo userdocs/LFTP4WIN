@@ -382,6 +382,7 @@ timeout /T 60
 goto :eof
 
 :fail
+  set exit_code=%ERRORLEVEL%
   if exist "%DOWNLOADER%" (
     del "%DOWNLOADER%"
   )
@@ -391,7 +392,7 @@ goto :eof
   echo ###########################################################
   echo.
   timeout /T 60
-  exit /b 1
+  exit /B %exit_code%
 
 :download
   if exist "%2" (
@@ -401,15 +402,15 @@ goto :eof
 
   where /q curl
   if %ERRORLEVEL% EQU 0 (
-    call :download_with_curl %1 %2
+    call :download_with_curl "%1" "%2"
   )
 
   if errorlevel 1 (
-    call :download_with_powershell %1 %2
+    call :download_with_powershell "%1" "%2"
   )
 
   if errorlevel 1 (
-    call :download_with_vbs %1 %2 || goto :fail
+    call :download_with_vbs "%1" "%2" || goto :fail
   )
 
   exit /B 0
@@ -423,7 +424,7 @@ goto :eof
     set https_proxy=http://%PROXY_HOST%:%PROXY_PORT%
   )
   echo Downloading %1 to %2 using curl...
-  curl -sL %1 -# -o %2 || exit /B 1
+  curl -sL "%1" -# -o "%2" || exit /B 1
   exit /B 0
 
 :download_with_vbs
