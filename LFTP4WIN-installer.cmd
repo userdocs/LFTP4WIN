@@ -287,10 +287,10 @@ echo.
     echo #
     echo if [[ -f /.core-installed ^&^& $CORE_UPDATE = 'yes' ]]; then
     echo     echo "*******************************************************************************"
-    echo     echo "* Updating LFTP4WIN CORE..."
+    echo     echo "* Updating LFTP4WIN CORE"
     echo     echo "*******************************************************************************"
     echo     lftp4win_core_url="https://github.com/userdocs/LFTP4WIN-CORE/archive/master.zip"
-    echo     echo -e "\nDownload URL=$lftp4win_core_url\n"
+    echo     echo -e "\nDownload URL=$lftp4win_core_url"
     echo     curl -sL "$lftp4win_core_url" ^> "lftp4win_core.zip"
     echo     bsdtar -X '/.core-update-excludes' -xmf "lftp4win_core.zip" --strip-components=1 -C "$lftp4win_core"
     echo     [[ -d /applications ]] ^&^& touch /.core-installed
