@@ -362,6 +362,10 @@ echo.
   echo if "%%TERMINAL%%" == "mintty" ^(
   echo   start "" "%%LFTP4WIN_ROOT%%\bin\mintty.exe" --nopin --title LFTP4WIN -e /bin/bash -li
   echo ^)
+  echo.
+  echo if "%%TERMINAL%%" == "wt" ^(
+  echo   start "" wt -w 0 nt --title LFTP4WIN "%%LFTP4WIN_ROOT%%\bin\bash.exe" -li
+  echo ^)
 ) > "%Start_cmd%" || goto :fail
 
 echo ###########################################################
