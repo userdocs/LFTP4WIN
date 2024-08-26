@@ -194,13 +194,16 @@ echo.
   echo set GRP=
   echo set SHELL=/bin/bash
   echo echo.
-  echo set /p "REPLY=Update Cygwin? [y|n]: "
+  echo set /p "REPLY=Update Cygwin? [y|n] (default is [y]): " || SET "REPLY=y"
   echo echo.
   echo.
   echo if "%%REPLY%%" == "y" ^(
-  echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n]: "
+  echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n] (default is [n]): " || SET "PACKETMANAGER=n"
   echo     echo.
   echo ^)
+  echo.
+  echo set /p "SKIPCORE=Skip downloading core files? [y|n] (default is [y]): " || SET "SKIPCORE=y"
+  echo echo.
   echo.
   echo if "%%PACKETMANAGER%%" == "y" ^(
   echo     set PACKETMANAGER=--package-manager
@@ -236,9 +239,10 @@ echo.
   echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
   echo ^)
   echo.
-  echo "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
-  echo.
-  echo IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
+  echo if "%%SKIPCORE%%" == "y" ^(
+  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
+  echo     IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
+  echo ^)
   echo.
   echo echo.
   echo echo ###########################################################
