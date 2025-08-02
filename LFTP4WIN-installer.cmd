@@ -178,87 +178,233 @@ echo.
 echo Creating updater [%Updater_cmd%]
 echo.
 (
-  echo @echo off
-  echo setlocal enabledelayedexpansion
-  echo.
-  echo set LFTP4WIN_BASE=%%~dp0
-  echo set LFTP4WIN_ROOT=%%~dp0system
-  echo set INSTALL_TEMP=%%~dp0system\tmp
-  echo.
-  echo set CYGWIN_SETUP_EXE=%CYGWIN_SETUP_EXE%
-  echo set CORE_UPDATE=yes
-  echo set PATH=%%LFTP4WIN_ROOT%%\bin
-  echo set USERNAME=%LFTP4WIN_USERNAME%
-  echo set HOME=%%LFTP4WIN_BASE%%home
-  echo set GROUP=None
-  echo set GRP=
-  echo set SHELL=/bin/bash
-  echo echo.
-  echo set /p "REPLY=Update Cygwin? [y|n] (default is [y]): " ^|^| SET "REPLY=y"
-  echo echo.
-  echo.
-  echo if "%%REPLY%%" == "y" ^(
-  echo     set /p "PACKETMANAGER=Open Cygwin packet manager? [y|n] (default is [n]): " ^|^| SET "PACKETMANAGER=n"
-  echo     echo.
-  echo ^)
-  echo.
-  echo set /p "SKIPCORE=Skip downloading core files? [y|n] (default is [y]): " ^|^| SET "SKIPCORE=y"
-  echo echo.
-  echo.
-  echo if "%%PACKETMANAGER%%" == "y" ^(
-  echo     set PACKETMANAGER=--package-manager
-  echo ^)
-  echo.
-  echo if "%%REPLY%%" == "y" ^(
-  echo     echo ###########################################################
-  echo     echo # Updating Cygwin [LFTP4WIN Portable]
-  echo     echo ###########################################################
-  echo     echo.
-  echo     echo Downloading Cygwin Setup and the core-update-requirements files
-  echo.
-  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://cygwin.org/%CYGWIN_SETUP_EXE%" ^> "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%"
-  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements" ^> "%%INSTALL_TEMP%%\.core-update-requirements"
-  echo.
-  echo     set /p C_U_R=^<"%%INSTALL_TEMP%%\.core-update-requirements"
-  echo.
-  echo     "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" --no-admin ^^
-  echo     --site %CYGWIN_MIRROR% ^^
-  echo     --root "%%LFTP4WIN_ROOT%%" ^^
-  echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
-  echo     --no-shortcuts ^^
-  echo     --no-desktop ^^
-  echo     --delete-orphans ^^
-  echo     --upgrade-also ^^
-  echo     --no-replaceonreboot ^^
-  echo     --quiet-mode ^^
-  echo     --packages ^!C_U_R^! %%PACKETMANAGER%% ^|^| goto :fail
-  if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
-    echo     rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache"
-  )
-  echo     echo.
-  echo     del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" "%%LFTP4WIN_ROOT%%\Cygwin.bat" "%%LFTP4WIN_ROOT%%\Cygwin.ico" "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico"
-  echo ^)
-  echo.
-  echo if "%%SKIPCORE%%" == "n" ^(
-  echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL "https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd" ^> "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd"
-  echo     IF EXIST "%%LFTP4WIN_ROOT%%\portable-init.sh" "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh"
-  echo ^)
-  echo.
-  echo echo.
-  echo echo ###########################################################
-  echo echo # Updating [LFTP4WIN Portable] succeeded.
-  echo echo ###########################################################
-  echo echo.
-  echo pause
-  echo goto :eof
-  echo echo.
-  echo :fail
-  echo echo ###########################################################
-  echo echo # Updating [LFTP4WIN Portable] FAILED!
-  echo echo ###########################################################
-  echo echo.
-  echo pause
-  echo exit /1
+echo @echo off
+echo setlocal enabledelayedexpansion
+echo title LFTP4WIN Updater
+echo.
+echo REM =====================================================
+echo REM LFTP4WIN Portable Update Utility
+echo REM Version: 2.0
+echo REM =====================================================
+echo.
+echo REM Define constants and environment variables
+echo set "LFTP4WIN_BASE=%%~dp0"
+echo set "LFTP4WIN_ROOT=%%~dp0system"
+echo set "INSTALL_TEMP=%%~dp0system\tmp"
+echo.
+echo set "CYGWIN_SETUP_EXE=%CYGWIN_SETUP_EXE%"
+echo set "CORE_UPDATE=no"
+echo set "PATH=%%LFTP4WIN_ROOT%%\bin"
+echo set "USERNAME=%LFTP4WIN_USERNAME%"
+echo set "HOME=%%LFTP4WIN_BASE%%home"
+echo set "GROUP=None"
+echo set "GRP="
+echo set "SHELL=/bin/bash"
+echo.
+echo REM Download configuration
+echo set "CURL_TIMEOUT=60"
+echo set "MAX_RETRIES=3"
+echo.
+echo REM Validate environment before starting
+echo call :validate_environment ^|^| goto :fail
+echo.
+echo REM Ensure required directories exist
+echo if not exist "%%INSTALL_TEMP%%" ^(
+echo     echo Creating temporary directory: %%INSTALL_TEMP%%
+echo     mkdir "%%INSTALL_TEMP%%" ^|^| ^(
+echo         echo Error: Failed to create temporary directory
+echo         goto :fail
+echo     ^)
+echo ^)
+echo.
+echo REM Set download URLs as variables for easier maintenance
+echo set "CYGWIN_URL=https://cygwin.org/setup-x86_64.exe"
+echo set "CYGWIN_MIRROR_PRIMARY=https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin/"
+echo set "CYGWIN_MIRROR_FALLBACK=https://mirrors.kernel.org/sourceware/cygwin/"
+echo set "CORE_REQS_URL=https://raw.githubusercontent.com/userdocs/LFTP4WIN-CORE/master/system/.core-update-requirements"
+echo set "INSTALLER_URL=https://raw.githubusercontent.com/userdocs/LFTP4WIN/master/LFTP4WIN-installer.cmd"
+echo.
+echo echo =====================================================
+echo echo           LFTP4WIN Portable Update Utility
+echo echo =====================================================
+echo echo.
+echo set /p "REPLY=Update Cygwin? [y/n] (default is [y]): " ^|^| set "REPLY=y"
+echo echo.
+echo.
+echo set "PACKETMANAGER="
+echo if /i "%%REPLY%%"=="y" ^(
+echo     set /p "PACKETMANAGER=Open Cygwin package manager? [y/n] (default is [n]): " ^|^| set "PACKETMANAGER=n"
+echo     echo.
+echo     if /i "!PACKETMANAGER!"=="y" ^(
+echo         set "PACKETMANAGER=--package-manager"
+echo     ^) else ^(
+echo         set "PACKETMANAGER="
+echo     ^)
+echo ^)
+echo.
+echo set /p "SKIPCORE=Skip downloading core files? [y/n] (default is [y]): " ^|^| set "SKIPCORE=y"
+echo echo.
+echo.
+echo if /i "%%REPLY%%"=="y" ^(
+echo     echo =====================================================
+echo     echo Updating Cygwin for LFTP4WIN Portable
+echo     echo =====================================================
+echo     echo.
+echo     echo Downloading required files...
+echo.
+echo     REM Download Cygwin Setup with retry logic
+echo     call :download_with_retry "%%CYGWIN_URL%%" "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" "Cygwin Setup" ^|^| goto :fail
+echo.
+echo     REM Download core requirements with retry logic
+echo     call :download_with_retry "%%CORE_REQS_URL%%" "%%INSTALL_TEMP%%\.core-update-requirements" "Core requirements" ^|^| goto :fail
+echo.
+echo     REM Read core update requirements
+echo     if exist "%%INSTALL_TEMP%%\.core-update-requirements" ^(
+echo         set /p C_U_R=^<"%%INSTALL_TEMP%%\.core-update-requirements"
+echo     ^) else ^(
+echo         echo Error: Core update requirements file not found.
+echo         goto :fail
+echo     ^)
+echo.
+echo     echo.
+echo     echo Running Cygwin update...
+echo     echo This may take a while, please be patient.
+echo.
+echo     REM Try primary mirror first, fallback to secondary if needed
+echo     call :run_cygwin_update "%%CYGWIN_MIRROR_PRIMARY%%" ^|^| ^(
+echo         echo Primary mirror failed, trying fallback mirror...
+echo         call :run_cygwin_update "%%CYGWIN_MIRROR_FALLBACK%%" ^|^| goto :fail
+echo     ^)
+echo.
+echo     echo Cleaning up temporary files...
+echo     call :cleanup_files
+echo ^)
+echo.
+echo if /i "%%SKIPCORE%%"=="n" ^(
+echo     echo.
+echo     echo =====================================================
+echo     echo Downloading and updating core files...
+echo     echo =====================================================
+echo.
+echo     REM Download latest installer script with retry logic
+echo     call :download_with_retry "%%INSTALLER_URL%%" "%%LFTP4WIN_BASE%%\LFTP4WIN-installer.cmd" "Installer script" ^|^| goto :fail
+echo.
+echo     echo Running portable initialization...
+echo     set CORE_UPDATE=yes
+echo     if exist "%%LFTP4WIN_ROOT%%\portable-init.sh" ^(
+echo         echo Executing portable-init.sh...
+echo         "%%LFTP4WIN_ROOT%%\bin\bash" -li "%%LFTP4WIN_ROOT%%\portable-init.sh" ^|^| ^(
+echo             echo Warning: portable-init.sh execution failed
+echo         ^)
+echo     ^) else ^(
+echo         echo Warning: portable-init.sh not found, skipping initialization.
+echo     ^)
+echo ^)
+echo.
+echo echo.
+echo echo =====================================================
+echo echo LFTP4WIN Portable update completed successfully!
+echo echo =====================================================
+echo echo.
+echo pause
+echo exit /b 0
+echo.
+echo :fail
+echo echo.
+echo echo =====================================================
+echo echo            LFTP4WIN Portable update FAILED!
+echo echo =====================================================
+echo echo Please check the error messages above for details.
+echo echo.
+echo pause
+echo exit /b 1
+echo.
+echo REM =====================================================
+echo REM Helper Functions
+echo REM =====================================================
+echo.
+echo :validate_environment
+echo     echo Validating environment...
+echo.
+echo     REM Check if LFTP4WIN_ROOT directory exists
+echo     if not exist "%%LFTP4WIN_ROOT%%" ^(
+echo         echo Error: LFTP4WIN system directory not found: %%LFTP4WIN_ROOT%%
+echo         exit /b 1
+echo     ^)
+echo.
+echo     REM Check for curl executable
+echo     if not exist "%%LFTP4WIN_ROOT%%\bin\curl.exe" ^(
+echo         echo Error: curl.exe not found in %%LFTP4WIN_ROOT%%\bin
+echo         echo Please ensure LFTP4WIN is properly installed.
+echo         exit /b 1
+echo     ^)
+echo.
+echo     echo Environment validation successful.
+echo     exit /b 0
+echo.
+echo :download_with_retry
+echo     set "url=%%~1"
+echo     set "output=%%~2"
+echo     set "description=%%~3"
+echo     set "retry_count=0"
+echo.
+echo     :retry_download
+echo     if !retry_count! geq %%MAX_RETRIES%% ^(
+echo         echo Error: Failed to download !description! after %%MAX_RETRIES%% attempts.
+echo         exit /b 1
+echo     ^)
+echo.
+echo     set /a retry_count+=1
+echo     echo Downloading !description! ^(attempt !retry_count!/%%MAX_RETRIES%%^)...
+echo.
+echo     "%%LFTP4WIN_ROOT%%\bin\curl.exe" -sL --connect-timeout %%CURL_TIMEOUT%% --max-time 300 "!url!" -o "!output!" ^&^& ^(
+echo         echo Successfully downloaded !description!
+echo         exit /b 0
+echo     ^) ^|^| ^(
+echo         echo Download attempt !retry_count! failed for !description!
+echo         if !retry_count! lss %%MAX_RETRIES%% ^(
+echo             echo Retrying in 2 seconds...
+echo             timeout /t 2 /nobreak ^>nul
+echo         ^)
+echo         goto :retry_download
+echo     ^)
+echo.
+echo :run_cygwin_update
+echo     set "mirror_url=%%~1"
+echo.
+echo     "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" --no-admin ^^
+echo     --site "!mirror_url!" ^^
+echo     --root "%%LFTP4WIN_ROOT%%" ^^
+echo     --local-package-dir "%%LFTP4WIN_ROOT%%\.pkg-cache" ^^
+echo     --no-shortcuts ^^
+echo     --no-desktop ^^
+echo     --delete-orphans ^^
+echo     --upgrade-also ^^
+echo     --no-replaceonreboot ^^
+echo     --quiet-mode ^^
+echo     --packages !C_U_R! %%PACKETMANAGER%%
+echo.
+echo     exit /b %%errorlevel%%
+echo.
+echo :cleanup_files
+echo     echo Removing temporary files and cache...
+echo.
+echo     if exist "%%LFTP4WIN_ROOT%%\.pkg-cache" ^(
+echo         echo Removing package cache...
+echo         rd /s /q "%%LFTP4WIN_ROOT%%\.pkg-cache" 2^>nul
+echo     ^)
+echo.
+echo     if exist "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" ^(
+echo         del /q "%%INSTALL_TEMP%%\%%CYGWIN_SETUP_EXE%%" 2^>nul
+echo     ^)
+echo.
+echo     REM Remove Cygwin default files that we don't need
+echo     if exist "%%LFTP4WIN_ROOT%%\Cygwin.bat" del /q "%%LFTP4WIN_ROOT%%\Cygwin.bat" 2^>nul
+echo     if exist "%%LFTP4WIN_ROOT%%\Cygwin.ico" del /q "%%LFTP4WIN_ROOT%%\Cygwin.ico" 2^>nul
+echo     if exist "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico" del /q "%%LFTP4WIN_ROOT%%\Cygwin-Terminal.ico" 2^>nul
+echo.
+echo     echo Cleanup completed.
+echo     exit /b 0
 ) > "%Updater_cmd%" || goto :fail
 
 set Init_sh=%LFTP4WIN_ROOT%\portable-init.sh
